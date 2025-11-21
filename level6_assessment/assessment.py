@@ -4,8 +4,14 @@
 import csv
 
 
-# Function to read student marks from a CSV file
-def readStudentMarks(fileName):
+
+def read_student_marks(fileName):
+    """
+    Function to read student marks from a CSV file.
+    :param fileName: file to open
+    :return: list of student marks
+    """
+
     students = []
     # Open the CSV file and iterate through its rows
     with open(fileName) as file:
@@ -46,19 +52,20 @@ def saveTopPupils(fileName, topPupils, topMark):
             writer.writerow([pupil, topMark])
 
 
-inputFileName = 'FileForStudents.csv'
-outputFileName = 'topStudent.csv'
+if __name__ == "__main__":
+    inputFileName = 'FileForStudents.csv'
+    outputFileName = 'topStudent.csv'
 
-# Read student data from the input file
-students = readStudentMarks(inputFileName)
-# Find the top pupil(s) and the highest mark
-topPupils, topMark = findTopPupil(students)
+    # Read student data from the input file
+    students = read_student_marks(inputFileName)
+    # Find the top pupil(s) and the highest mark
+    topPupils, topMark = findTopPupil(students)
 
-print("The pupil(s) with the highest mark is/are:")
-for pupil in topPupils:
-    print("Name:", pupil, ", Mark:", topMark)
+    print("The pupil(s) with the highest mark is/are:")
+    for pupil in topPupils:
+        print("Name:", pupil, ", Mark:", topMark)
 
-# Save the top pupil(s) and their mark to the output file
-saveTopPupils(outputFileName, topPupils, topMark)
+    # Save the top pupil(s) and their mark to the output file
+    saveTopPupils(outputFileName, topPupils, topMark)
 
 
