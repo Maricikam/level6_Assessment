@@ -3,69 +3,89 @@
 # Import csv module
 import csv
 
+# Valid range for an exam mark
+MIN_MARK = 0
+MAX_MARK = 200
 
 
-def read_student_marks(fileName):
+def read_student_marks(file_name):
     """
-    Function to read student marks from a CSV file.
-    :param fileName: file to open
-    :return: list of student marks
+    Read pupil names and marks from a CSV file into two parallel 1-D arrays.
+    :param file_name: file to open
+    :return: (names, marks) - parallel lists of pupil names and their marks
     """
-
-    students = []
+    names = []
+    marks = []
     # Open the CSV file and iterate through its rows
-    with open(fileName) as file:
+    with open(file_name) as file:
         reader = csv.reader(file)
-        for row in reader:
-            name = row[0] + " " + row[1]
-            mark = int(row[2])
-            students.append((name, mark))
-    return students
+        for row_number, row in enumerate(reader, start=1):
+            try:
+                name = row[0] + " " + row[1]
+                mark = int(row[2])
+            except (IndexError, ValueError):
+                print(f"Warning: Skipping malformed row {row_number}: {row}")
+                continue
+            names.append(name)
+            marks.append(mark)
+    return names, marks
 
 
-# Function to find the pupil(s) with the highest mark
-def findTopPupil(students):
-    topMark = 0
-    topPupils = []
+def find_top_pupil(names, marks):
+    """
+    Find the pupil(s) with the highest valid mark.
+    :param names: 1-D array of pupil names
+    :param marks: 1-D array of pupil marks, parallel to names
+    :return: (top_pupils, top_mark) - names sharing the top mark, and that mark
+    """
+    top_mark = 0
+    top_pupils = []
 
-    for name, mark in students:
-        if 0 <= mark <= 200:
+    for name, mark in zip(names, marks):
+        if MIN_MARK <= mark <= MAX_MARK:
             # Update the top mark and top pupils if a higher mark is found
-            if mark > topMark:
-                topMark = mark
-                topPupils = [name]
-            elif mark == topMark:
+            if mark > top_mark:
+                top_mark = mark
+                top_pupils = [name]
+            elif mark == top_mark:
                 # Add pupil to list if they have the same top mark
-                topPupils.append(name)
+                top_pupils.append(name)
         else:
-            print(f"Warning: Invalid mark ({mark}) found for {name}. Mark should be in the range of 0 to 200.")
+            print(f"Warning: Invalid mark ({mark}) found for {name}. Mark should be in the range of {MIN_MARK} to {MAX_MARK}.")
 
-    return topPupils, topMark
+    return top_pupils, top_mark
 
 
-# Function to save top pupils to a new CSV file
-def saveTopPupils(fileName, topPupils, topMark):
-    with open(fileName, 'w', newline='') as myNewFile:
-        writer = csv.writer(myNewFile)
+def save_top_pupils(file_name, top_pupils, top_mark):
+    """
+    Save the top pupil(s) and their mark to a CSV file.
+    :param file_name: file to write
+    :param top_pupils: list of pupil names with the top mark
+    :param top_mark: the top mark achieved
+    """
+    with open(file_name, 'w', newline='') as new_file:
+        writer = csv.writer(new_file)
         writer.writerow(['Name', 'Mark'])
-        for pupil in topPupils:
-            writer.writerow([pupil, topMark])
+        for pupil in top_pupils:
+            writer.writerow([pupil, top_mark])
 
 
 if __name__ == "__main__":
-    inputFileName = 'FileForStudents.csv'
-    outputFileName = 'topStudent.csv'
+    input_file_name = 'FileForStudents.csv'
+    output_file_name = 'topStudent.csv'
 
-    # Read student data from the input file
-    students = read_student_marks(inputFileName)
-    # Find the top pupil(s) and the highest mark
-    topPupils, topMark = findTopPupil(students)
+    try:
+        # Read student data from the input file
+        student_names, student_marks = read_student_marks(input_file_name)
+    except FileNotFoundError:
+        print(f"Error: Could not find input file '{input_file_name}'.")
+    else:
+        # Find the top pupil(s) and the highest mark
+        top_pupils, top_mark = find_top_pupil(student_names, student_marks)
 
-    print("The pupil(s) with the highest mark is/are:")
-    for pupil in topPupils:
-        print("Name:", pupil, ", Mark:", topMark)
+        print("The pupil(s) with the highest mark is/are:")
+        for pupil in top_pupils:
+            print("Name:", pupil, ", Mark:", top_mark)
 
-    # Save the top pupil(s) and their mark to the output file
-    saveTopPupils(outputFileName, topPupils, topMark)
-
-
+        # Save the top pupil(s) and their mark to the output file
+        save_top_pupils(output_file_name, top_pupils, top_mark)
